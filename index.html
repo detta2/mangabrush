@@ -720,9 +720,9 @@ function inpaint(x, y, w, h, mode) {
     pctx.fillStyle = "#ffffff";
     const cx = x + w / 2, cy = y + h / 2;
     pctx.beginPath();
-    pctx.ellipse(cx, cy, w * 0.55, h * 0.57, 0, 0, Math.PI * 2);
+    pctx.ellipse(cx, cy, w * 0.52, h * 0.53, 0, 0, Math.PI * 2);
     pctx.fill();
-    pctx.fillRect(x + w * 0.07, y + h * 0.05, w * 0.86, h * 0.9);
+    pctx.fillRect(x + w * 0.09, y + h * 0.17, w * 0.82, h * 0.66);
     pctx.restore();
   } else {
     pctx.save();
@@ -743,11 +743,12 @@ function inpaint(x, y, w, h, mode) {
 }
 
 /* ---------------- TYPESETTING ---------------- */
-function addTranslationText(text, x, y, w, h) {
+function addTranslationText(text, x, y, w, h, mode) {
   const id = ++textSeq;
+  const widthFactor = mode === "bubble" ? 0.86 : 0.96;
   const tb = new fabric.Textbox(String(text).toUpperCase(), {
     left: x + w / 2, top: y + h / 2, originX: "center", originY: "center",
-    width: Math.max(48, w * 0.96),
+    width: Math.max(48, w * widthFactor),
     fontFamily: "'Bangers','Comic Neue',cursive",
     fontSize: 32, fill: "#141414",
     stroke: "#ffffff", strokeWidth: 4, paintFirst: "stroke", strokeLineJoin: "round",
@@ -763,7 +764,8 @@ function addTranslationText(text, x, y, w, h) {
   if (tb.initDimensions) tb.initDimensions();
   tb.setCoords();
   let guard = 0;
-  while (tb.height > h * 1.02 && fs > 11 && guard < 30) {
+  const fitTarget = mode === "bubble" ? h * 0.98 : h * 1.02;
+  while (tb.height > fitTarget && fs > 11 && guard < 30) {
     fs -= 2;
     tb.set("fontSize", fs);
     if (tb.initDimensions) tb.initDimensions();
@@ -889,7 +891,7 @@ async function processRegion(br) {
   inpaint(x, y, w, h, mode);
   pageImg.dirty = true;
   canvas.requestRenderAll();
-  const obj = addTranslationText(res.translation, x, y, w, h);
+  const obj = addTranslationText(res.translation, x, y, w, h, mode);
   addHistory(res.original, res.translation, obj.id, simulated, mode);
 }
 
